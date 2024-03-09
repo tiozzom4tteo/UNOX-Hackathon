@@ -9,9 +9,8 @@ def load_css(file_name):
 
 
 st.set_page_config(page_title="Ace")  # HTML title
-load_css("styles.css")
+# load_css("styles.css")
 st.title("Ace - Your Everyday Assistant")  # page title
-
 
 if 'memory' not in st.session_state:  # see if the memory hasn't been created yet
     st.session_state.memory = glib.get_memory()  # initialize the memory
@@ -27,6 +26,36 @@ if 'vector_index' not in st.session_state:  # see if the vector index hasn't bee
         # retrieve the index through the supporting library and store in the app's session cache
         st.session_state.vector_index = glib.get_index()
 
+if 'show_input' not in st.session_state:
+    st.session_state.show_input = False  # hidden by default
+if 'hide_btn' not in st.session_state:
+    st.session_state.hide_btn = False  # shown by default
+
+with st.chat_message("assistant"):
+    st.write("Hello👋 My name is Ace, how can I assist you today?")
+
+if not st.session_state.hide_btn:
+    with st.container():
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            btn1 = st.button("Sale Assistant")
+            if btn1:
+                st.session_state.hide_btn = True
+                st.experimental_rerun()
+
+        with col2:
+            btn2 = st.button("Tech Support")
+            if btn2:
+                st.session_state.hide_btn = True
+                st.experimental_rerun()
+        with col3:
+            btn3 = st.button("Start a conversation")
+            if btn3:  # When btn3 is clicked
+                st.session_state.show_input = True  # Enable input field
+                st.session_state.hide_btn = True
+                # force refresh
+                st.experimental_rerun()
+
 
 # Re-render the chat history (Streamlit re-runs this script, so need this to preserve previous chat messages)
 for message in st.session_state.chat_history:  # loop through the chat history
@@ -36,7 +65,11 @@ for message in st.session_state.chat_history:  # loop through the chat history
 
 
 # display a chat input box
-input_text = st.chat_input("Ask Ace...")
+# input_text = st.chat_input("Ask Ace...")
+input_text = None
+
+if st.session_state.show_input and st.session_state.hide_btn:
+    input_text = st.chat_input("Ask Ace...")
 
 if input_text:  # run the code in this if block after the user submits a chat message
 
