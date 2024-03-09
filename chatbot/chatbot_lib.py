@@ -13,22 +13,30 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+from langchain.chains import create_sql_query_chain
+from sqlalchemy import create_engine
+from langchain_community.utilities import SQLDatabase
+
+
+postgres_user = "postgres"
+postgres_password = ""
+postgres_host = "localhost"
+postgres_db = "tiozzomatteo"
 
 
 def get_llm(streaming_callback):
 
     model_kwargs = {  # Anthropic's Claude model
-        "max_tokens_to_sample": 2048,
-        "temperature": 1,
-        "top_k": 300,
-        "top_p": 1,
-        "stop_sequences": ["\n\nHuman:"]
+        "maxTokenCount": 4000, 
+        "stopSequences": [], 
+        "temperature": 1, 
+        "topP": 0.9, 
     }
 
     llm = Bedrock(
         credentials_profile_name=os.environ.get("default"),
         region_name="us-east-1",  # sets the region name (if not the default)
-        model_id="anthropic.claude-v2:1",
+        model_id="amazon.titan-text-express-v1",
         model_kwargs=model_kwargs,
         streaming=True,
         callbacks=[streaming_callback],
@@ -48,7 +56,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "../unox_hackathon_setup.pdf"
+    pdf_path = "../document/prova.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
@@ -89,5 +97,17 @@ def get_chat_response(prompt, memory, index, streaming_callback):  # chat client
 
     # pass the user message, history, and knowledge to the model
     chat_response = conversation_with_retrieval({"question": prompt})
+    print(prompt)
+    prova = "Utente: " + prompt + ". Crea una query in linguaggio sql per trovare il forno ricercato dall'utente."
+    prova1 = conversation_with_retrieval({"question": prova})
+    db = SQLDatabase.from_uri(f"postgresql+psycopg2://{postgres_user}:{postgres_password}@{postgres_host}/{postgres_db}")
+    
+    chain = create_sql_query_chain(llm, db)
+    response = chain.invoke({"question": "qual è il cognome di matteo"})
+
+    print(db.run(response))
+    print(prova1)
+
+    
 
     return chat_response['answer']
