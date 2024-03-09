@@ -1,3 +1,4 @@
+import os
 from langchain.chains import ConversationChain
 from langchain.llms import Bedrock
 
@@ -12,14 +13,16 @@ def get_llm(streaming_callback):
         "return_likelihoods": "NONE",
         "stream": True
     }
-    
+
     llm = Bedrock(
+        credentials_profile_name=os.environ.get("default"),
+        region_name='us-east-1',
         model_id="cohere.command-text-v14",
         model_kwargs=model_kwargs,
         streaming=True,
         callbacks=[streaming_callback],
     )
-    
+
     return llm
 
 
