@@ -50,7 +50,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "2022-Shareholder-Letter.pdf"
+    pdf_path = "../document/manuale.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
