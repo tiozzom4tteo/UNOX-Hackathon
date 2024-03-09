@@ -14,13 +14,18 @@ st.title("Ace - Your Everyday Assistant")  # page title
 
 
 if 'memory' not in st.session_state:  # see if the memory hasn't been created yet
-    st_callback = StreamlitCallbackHandler(st.container())
-    st.session_state.memory = glib.get_memory(
-        st_callback)  # initialize the memory
+    st.session_state.memory = glib.get_memory()  # initialize the memory
 
 
 if 'chat_history' not in st.session_state:  # see if the chat history hasn't been created yet
     st.session_state.chat_history = []  # initialize the chat history
+
+
+if 'vector_index' not in st.session_state:  # see if the vector index hasn't been created yet
+    # show a spinner while the code in this with block runs
+    with st.spinner("Indexing document..."):
+        # retrieve the index through the supporting library and store in the app's session cache
+        st.session_state.vector_index = glib.get_index()
 
 
 # Re-render the chat history (Streamlit re-runs this script, so need this to preserve previous chat messages)
@@ -44,7 +49,7 @@ if input_text:  # run the code in this if block after the user submits a chat me
     # use an empty container for streaming output
     st_callback = StreamlitCallbackHandler(st.container())
     chat_response = glib.get_chat_response(
-        prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback)
+        prompt=input_text, memory=st.session_state.memory, index=st.session_state.vector_index, streaming_callback=st_callback)
 
     # with st.chat_message("assistant"):  # display a bot chat message
     #     st.markdown(chat_response)  # display bot's latest response
