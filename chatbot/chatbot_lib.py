@@ -17,20 +17,18 @@ from langchain.document_loaders import PyPDFLoader
 
 def get_llm(streaming_callback):
 
-    model_kwargs = {
-        "max_tokens": 4000,
-        "temperature": 0,
-        "p": 0.01,
-        "k": 0,
-        "stop_sequences": [],
-        "return_likelihoods": "NONE",
-        "stream": True
+    model_kwargs = {  # Anthropic's Claude model
+        "max_tokens_to_sample": 2048,
+        "temperature": 1,
+        "top_k": 300,
+        "top_p": 1,
+        "stop_sequences": ["\n\nHuman:"]
     }
 
     llm = Bedrock(
         credentials_profile_name=os.environ.get("default"),
-        region_name='us-east-1',  # sets the region name (if not the default)
-        model_id="cohere.command-text-v14",
+        region_name="us-east-1",  # sets the region name (if not the default)
+        model_id="anthropic.claude-v2:1",
         model_kwargs=model_kwargs,
         streaming=True,
         callbacks=[streaming_callback],
@@ -50,7 +48,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "2022-Shareholder-Letter.pdf"
+    pdf_path = "../unox_hackathon_setup.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
