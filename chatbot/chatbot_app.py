@@ -12,7 +12,6 @@ st.set_page_config(page_title="Ace")  # HTML title
 load_css("styles.css")
 st.title("Ace - Your Everyday Assistant")  # page title
 
-
 if 'memory' not in st.session_state:  # see if the memory hasn't been created yet
     st_callback = StreamlitCallbackHandler(st.container())
     st.session_state.memory = glib.get_memory(
