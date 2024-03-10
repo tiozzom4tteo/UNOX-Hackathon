@@ -8,6 +8,15 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+from langchain.chains import create_sql_query_chain
+from sqlalchemy import create_engine
+from langchain_community.utilities import SQLDatabase
+
+
+postgres_user = "postgres"
+postgres_password = ""
+postgres_host = "localhost"
+postgres_db = "tiozzomatteo"
 
 
 def get_llm(streaming_callback):
@@ -83,5 +92,17 @@ def get_chat_response(prompt, memory, index, streaming_callback):  # chat client
 
     # pass the user message, history, and knowledge to the model
     chat_response = conversation_with_retrieval({"question": prompt})
+    print(prompt)
+    prova = "Utente: " + prompt + \
+        ". Crea una query in linguaggio sql per trovare il forno ricercato dall'utente."
+    prova1 = conversation_with_retrieval({"question": prova})
+    db = SQLDatabase.from_uri(
+        f"postgresql+psycopg2://{postgres_user}:{postgres_password}@{postgres_host}/{postgres_db}")
+
+    chain = create_sql_query_chain(llm, db)
+    response = chain.invoke({"question": "qual è il cognome di matteo"})
+
+    print(db.run(response))
+    print(prova1)
 
     return chat_response['answer']
