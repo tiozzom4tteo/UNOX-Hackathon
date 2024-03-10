@@ -11,5 +11,7 @@ CREATE TABLE IF NOT EXISTS oven (
 	steam_idle_energy_rate REAL, -- kW
 	convection_cooking_energy_efficiency REAL,
 	steam_cooking_energy_efficiency REAL,
-	steam_water_consumption REAL -- gal/pan
+	steam_water_consumption REAL, -- gal/pan
+	price REAL NOT NULL,
+	size REAL NOT NULL
 );

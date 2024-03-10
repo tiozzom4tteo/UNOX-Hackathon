@@ -109,7 +109,7 @@ def get_chat_response_rag(prompt, memory, streaming_callback, index):
 
 def get_chat_response(prompt, memory, streaming_callback):  # chat client function
 
-    db = SQLDatabase.from_uri("sqlite:///ovensUnox.db")
+    db = SQLDatabase.from_uri("sqlite:///dataNew.db")
     llm = get_llm(streaming_callback)
     chain = create_sql_query_chain(llm, db)
 
