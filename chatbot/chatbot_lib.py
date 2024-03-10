@@ -1,13 +1,8 @@
-# import os
-# from langchain.memory import ConversationSummaryBufferMemory
-# from langchain.llms.bedrock import Bedrock
-# from langchain.chains import ConversationChain
-
 import os
+import json
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.llms.bedrock import Bedrock
 from langchain.chains import ConversationalRetrievalChain
-
 from langchain.embeddings import BedrockEmbeddings
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.vectorstores import FAISS
@@ -16,19 +11,18 @@ from langchain.document_loaders import PyPDFLoader
 
 
 def get_llm(streaming_callback):
-
-    model_kwargs = {  # Anthropic's Claude model
-        "max_tokens_to_sample": 2048,
-        "temperature": 1,
-        "top_k": 300,
-        "top_p": 1,
-        "stop_sequences": ["\n\nHuman:"]
+    model_kwargs = {
+        "maxTokenCount": 8192,
+        "stopSequences": [],
+        "temperature": 0.2,
+        "topP": 0.5
     }
 
     llm = Bedrock(
         credentials_profile_name=os.environ.get("default"),
-        region_name="us-east-1",  # sets the region name (if not the default)
-        model_id="anthropic.claude-v2:1",
+        region_name="us-east-1",
+        model_id="amazon.titan-text-express-v1",
+        # Note: This is assuming model_kwargs accepts these parameters directly
         model_kwargs=model_kwargs,
         streaming=True,
         callbacks=[streaming_callback],
@@ -37,7 +31,7 @@ def get_llm(streaming_callback):
     return llm
 
 
-def get_index():  # creates and returns an in-memory vector store to be used in the application
+def get_index(pdf_path):  # creates and returns an in-memory vector store to be used in the application
 
     embeddings = BedrockEmbeddings(
         # sets the profile name to use for AWS credentials (if not the default)
@@ -48,7 +42,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "../unox_hackathon_setup.pdf"
+    # pdf_path = "../unox_hackathon_setup.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
