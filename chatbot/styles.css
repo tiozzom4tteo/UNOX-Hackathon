@@ -1,4 +1,48 @@
 h1#ace-your-everyday-assistant {
-    color: red;
     text-align: center;
+}
+
+div.stChatMessage p {
+    font-size: 1.3em;
+    padding-left: 1em;
+}
+
+div.st-emotion-cache-jmw8un {
+    width: 2.5em;
+    height: 2.5em;
+}
+
+div.st-emotion-cache-s1k4sy.e1d2x3se3 textarea {
+    font-size: 1.3em;
+}
+
+div.st-emotion-cache-s1k4sy.e1d2x3se3 button.st-emotion-cache-1621d17 {
+    margin: auto;
+}
+
+div.st-emotion-cache-ocqkz7.e1f1d6gn5 {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+button.st-emotion-cache-19rxjzo.ef3psqc12 {
+    width: 12em;
+    padding: 1em;
+}
+
+div.row-widget.stButton {
+    display: block;
+    padding: 1em;
+    justify-content: center;
+    align-items: center;
+}
+
+div.stChatMessage.st-emotion-cache-4oy321.eeusbqq4 {
+    padding: 1em;
+}
+
+div.st-emotion-cache-sh2krr.e1nzilvr5 p,
+div.st-emotion-cache-cnbvxy.e1nzilvr5 p {
+    font-size: 1.3em;
 }

@@ -1,11 +1,8 @@
-# import os
-# from langchain.memory import ConversationSummaryBufferMemory
-# from langchain.llms.bedrock import Bedrock
-# from langchain.chains import ConversationChain
-
 import os
 from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain.llms.bedrock import Bedrock
+from langchain.chains import ConversationChain
 from langchain.chains import ConversationalRetrievalChain
 
 from langchain.embeddings import BedrockEmbeddings
@@ -13,6 +10,10 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+
+import sqlite3
+from langchain.chains import create_sql_query_chain
+from langchain_community.utilities import SQLDatabase
 
 
 def get_llm(streaming_callback):
@@ -73,18 +74,20 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     return index_from_loader  # return the index to be cached by the client app
 
 
-def get_memory():  # create memory for this chat session
+def get_memory(st_callback, flag):  # create memory for this chat session
 
-    # Maintains a history of previous messages
-    memory = ConversationBufferWindowMemory(
-        memory_key="chat_history", return_messages=True)
+    if flag == 1:
+        llm = get_llm(st_callback)
+        memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=1024)
+    elif flag == 2:
+        memory = ConversationBufferWindowMemory(
+            memory_key="chat_history", return_messages=True)
 
     return memory
 
 
-def get_chat_response(prompt, memory, index, streaming_callback):  # chat client function
-
-    llm = get_llm(streaming_callback)
+# rag response
+def get_chat_response_rag(prompt, memory, streaming_callback, index):
 
     conversation_with_retrieval = ConversationalRetrievalChain.from_llm(
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)
@@ -93,3 +96,26 @@ def get_chat_response(prompt, memory, index, streaming_callback):  # chat client
     chat_response = conversation_with_retrieval({"question": prompt})
 
     return chat_response['answer']
+
+
+def get_chat_response(prompt, memory, streaming_callback):  # chat client function
+
+    db = SQLDatabase.from_uri("sqlite:///pincode.db")
+    llm = get_llm(streaming_callback)
+    chain = create_sql_query_chain(llm, db)
+    response = chain.invoke({"question": prompt})
+    print("1")
+    print(response)
+
+    # return response['answer']
+
+    # conversation_with_summary = ConversationChain(  # create a chat client
+    #     llm=llm,  # using the Bedrock LLM
+    #     memory=memory,  # with the summarization memory
+    #     verbose=True  # print out some of the internal states of the chain while running
+    # )
+
+    # # pass the user message and summary to the model
+    # chat_response = conversation_with_summary.predict(input=prompt)
+
+    # return chat_response
