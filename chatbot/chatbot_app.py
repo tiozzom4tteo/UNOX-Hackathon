@@ -2,28 +2,22 @@ import streamlit as st  # all streamlit commands will be available through the "
 import chatbot_lib as glib  # reference to local lib script
 from langchain.callbacks import StreamlitCallbackHandler
 
-st.set_page_config(page_title="Ace")  # HTML title
-st.title("Ace - Your Everyday Assistant")  # page title
-
 
 def load_css(file_name):
     with open(file_name, "r") as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
-# load_css("styles.css")
-if 'memory' not in st.session_state:  # see if the memory hasn't been created yet
-    st.session_state.memory = glib.get_memory()  # initialize the memory
+st.set_page_config(page_title="Ace")  # HTML title
+load_css("styles.css")
+st.title("Ace - Your Everyday Assistant")  # page title
+
 
 if 'chat_history' not in st.session_state:  # see if the chat history hasn't been created yet
     st.session_state.chat_history = []  # initialize the chat history
 
-
-if 'vector_index' not in st.session_state:  # see if the vector index hasn't been created yet
-    # show a spinner while the code in this with block runs
-    with st.spinner("Indexing document..."):
-        # retrieve the index through the supporting library and store in the app's session cache
-        st.session_state.vector_index = glib.get_index()
+if 'flag' not in st.session_state:
+    st.session_state.flag = 0  # Initialize the flag
 
 if 'show_input' not in st.session_state:
     st.session_state.show_input = False  # hidden by default
@@ -33,55 +27,36 @@ if 'hide_btn' not in st.session_state:
 if 'tech_support_initiated' not in st.session_state:
     st.session_state.tech_support_initiated = False  # Initialize the flag
 
-if 'flag' not in st.session_state:
-    st.session_state.flag = True  # Initialize the flag
-
-
-def tech():
-    if not st.session_state.tech_support_initiated:  # Check if tech support has already been initiated
-        st.session_state.tech_support_initiated = True  # Set the flag to True
-        st.session_state.hide_btn = True
-        st.session_state.show_input = True  # Enable input field
-        st.session_state.chat_history.append(
-            {"role": "user", "text": "I need help with tech support"})
-        chat_response = "insert your oven model"
-        st.session_state.chat_history.append(
-            {"role": "assistant", "text": chat_response})
-
-
 with st.chat_message("assistant"):
     st.markdown("Hello👋 My name is Ace, how can I assist you today?")
 
 
 if not st.session_state.hide_btn:
     with st.container():
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             btn1 = st.button("Sale Assistant")
             if btn1:
+                st.session_state.show_input = True
                 st.session_state.hide_btn = True
+                st.session_state.flag = 1
+                st.session_state.chat_history.append(
+                    {"role": "user", "text": "chat_response"})
+                st.session_state.chat_history.append(
+                    {"role": "assistant", "text": "chat_response"})
                 st.experimental_rerun()
 
         with col2:
             btn2 = st.button("Tech Support")
             if btn2:
-                tech()
-                st.experimental_rerun()
-
-        with col3:
-            btn3 = st.button("Start a conversation")
-            if btn3:  # When btn3 is clicked
-                st.session_state.show_input = True  # Enable input field
+                st.session_state.show_input = True
                 st.session_state.hide_btn = True
-                # force refresh
-                # Sostituisci questa linea nel tuo codice
-                st.session_state.memory = glib.get_memory()
-
-                # Con questa linea che utilizza la funzione appena creata
-                st.session_state.memory = glib.get_memory_from_database()
-
+                st.session_state.flag = 2
+                st.session_state.chat_history.append(
+                    {"role": "user", "text": "chat_response"})
+                st.session_state.chat_history.append(
+                    {"role": "assistant", "text": "chat_response"})
                 st.experimental_rerun()
-
 
 # Re-render the chat history (Streamlit re-runs this script, so need this to preserve previous chat messages)
 for message in st.session_state.chat_history:  # loop through the chat history
@@ -89,13 +64,19 @@ for message in st.session_state.chat_history:  # loop through the chat history
     with st.chat_message(message["role"]):
         st.markdown(message["text"])  # display the chat content
 
-# display a chat input box
-# input_text = st.chat_input("Ask Ace...")
-input_text = None
 
+# display a chat input box
+input_text = None
 
 if st.session_state.show_input and st.session_state.hide_btn:
     input_text = st.chat_input("Ask Ace...")
+
+# see if the vector index hasn't been created yet
+if st.session_state.flag == 2 and 'vector_index' not in st.session_state:
+    # show a spinner while the code in this with block runs
+    with st.spinner("Indexing document..."):
+        # retrieve the index through the supporting library and store in the app's session cache
+        st.session_state.vector_index = glib.get_index()
 
 if input_text:  # run the code in this if block after the user submits a chat message
 
@@ -104,23 +85,22 @@ if input_text:  # run the code in this if block after the user submits a chat me
 
     # append the user's latest message to the chat history
     st.session_state.chat_history.append({"role": "user", "text": input_text})
-    if st.session_state.flag:
-        if 'vector_index' not in st.session_state:  # see if the vector index hasn't been created yet
-            # show a spinner while the code in this with block runs
-            with st.spinner("Indexing document..."):
-                # retrieve the index through the supporting library and store in the app's session cache
-                st.session_state.vector_index = glib.get_index(
-                    "pdf/" + input_text + ".pdf")
-        st.session_state.flag = False
-    else:
-        print("Index already created")
-        st_callback = StreamlitCallbackHandler(st.container())
+
+    # use an empty container for streaming output
+    st_callback = StreamlitCallbackHandler(st.container())
+
+    if 'memory' not in st.session_state:  # see if the memory hasn't been created yet
+        st.session_state.memory = glib.get_memory(
+            st_callback, st.session_state.flag)  # initialize the memory
+
+    if st.session_state.flag == 1:
         chat_response = glib.get_chat_response(
-            prompt=input_text, memory=st.session_state.memory, index=st.session_state.vector_index, streaming_callback=st_callback)
+            prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback)
 
-        # with st.chat_message("assistant"):  # display a bot chat message
-        #     st.markdown(chat_response)  # display bot's latest response
+    elif st.session_state.flag == 2:
+        chat_response = glib.get_chat_response_rag(
+            prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback, index=st.session_state.vector_index)
 
-        # append the bot's latest message to the chat history
-        st.session_state.chat_history.append(
-            {"role": "assistant", "text": chat_response})
+    # append the bot's latest message to the chat history
+    st.session_state.chat_history.append(
+        {"role": "assistant", "text": chat_response})

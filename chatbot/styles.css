@@ -1,44 +1,10 @@
-:root {
-    --primary-100: #1E2022;
-    --primary-200: #34373b;
-    --primary-300: #F0F5F9;
-    --accent-100: #788189;
-    --accent-200: #e1e4e6;
-    --text-100: #1E2022;
-    --text-200: #52616B;
-    --text-300: #e4ecf4;
-    --bg-100: #F0F5F9;
-    --bg-200: #C9D6DF;
-    --bg-300: #bfc7d1;
-    --title: #c90a0a;
-}
-
-header.st-emotion-cache-1avcm0n.ezrtsby2 {
-    background-color: var(--bg-100);
-}
-
-div.st-emotion-cache-zq5wmm.ezrtsby0 > * {
-    color: var(--text-100);
-}
-
-div.st-emotion-cache-vj1c9o.ea3mdgi6 {
-    background-color: var(--bg-100);
-    color: var(--text-100);
-}
-
-div.appview-container.st-emotion-cache-1wrcr25.ea3mdgi9 {
-    background-color: var(--bg-100);
-}
-
 h1#ace-your-everyday-assistant {
-    color: var(--title);
     text-align: center;
 }
 
 div.stChatMessage p {
     font-size: 1.3em;
     padding-left: 1em;
-    color: var(--text-100);
 }
 
 div.st-emotion-cache-jmw8un {
@@ -48,17 +14,7 @@ div.st-emotion-cache-jmw8un {
 
 div.st-emotion-cache-s1k4sy.e1d2x3se3 textarea {
     font-size: 1.3em;
-    background-color: var(--accent-100);
 }
-
-div.st-emotion-cache-s1k4sy.e1d2x3se3 svg {
-    fill: var(--text-300);
-}
-
-div.st-emotion-cache-s1k4sy.e1d2x3se3 textarea::placeholder {
-    color: var(--text-300);
-}
-
 
 div.st-emotion-cache-s1k4sy.e1d2x3se3 button.st-emotion-cache-1621d17 {
     margin: auto;
@@ -68,10 +24,6 @@ div.st-emotion-cache-ocqkz7.e1f1d6gn5 {
     text-align: center;
     align-items: center;
     justify-content: center;
-}
-
-div.st-emotion-cache-ocqkz7.e1f1d6gn5 button:hover {
-    background-color: #f0f0f0;
 }
 
 button.st-emotion-cache-19rxjzo.ef3psqc12 {
