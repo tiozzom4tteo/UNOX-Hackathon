@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS ovens (
-	unique_id SERIAL PRIMARY KEY,
+	unique_id INT PRIMARY KEY,
 	brand VARCHAR(100) NOT NULL,
 	model_name VARCHAR(100) NOT NULL,
 	technology_type VARCHAR(100) NOT NULL,
