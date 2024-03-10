@@ -158,6 +158,7 @@ def get_chat_response(prompt, memory, streaming_callback):
 
     response = response[:response.find(";") + 1]
 
+    print(response)
 
     con = _sqlite3.connect("ovensUnox.db")
     
@@ -174,7 +175,7 @@ def get_chat_response(prompt, memory, streaming_callback):
     )
 
     stringa = prompt + "\n" + response + "\n" + """Context: 'You are a salesman and you are trying to send an oven to the customer who made the query. Use the SQL query to give the best answer to convince him'.  .
-    you have to use {response}, {res} and {prompt} to answer the question with natural language, not other datas"""
+    you have to use {response}, {res} and {prompt} to answer the question with natural language, not other datas. Don't write the 'SQLQuery:'"""
 
     chat_response = conversation_with_summary.predict(input=stringa)
 
