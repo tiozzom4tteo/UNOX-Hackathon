@@ -47,7 +47,7 @@ def get_llm(streaming_callback):
     return llm
 
 
-def get_index():  # creates and returns an in-memory vector store to be used in the application
+def get_index(pdf_path):  # creates and returns an in-memory vector store to be used in the application
 
     embeddings = BedrockEmbeddings(
         # sets the profile name to use for AWS credentials (if not the default)
@@ -58,7 +58,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "2022-Shareholder-Letter.pdf"
+    # pdf_path = "2022-Shareholder-Letter.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
@@ -95,6 +95,8 @@ def get_memory(st_callback, flag):  # create memory for this chat session
 
 # rag response
 def get_chat_response_rag(prompt, memory, streaming_callback, index):
+
+    llm = get_llm(streaming_callback)
 
     conversation_with_retrieval = ConversationalRetrievalChain.from_llm(
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)

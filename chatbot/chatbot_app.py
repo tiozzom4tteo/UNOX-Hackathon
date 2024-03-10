@@ -41,9 +41,9 @@ if not st.session_state.hide_btn:
                 st.session_state.hide_btn = True
                 st.session_state.flag = 1
                 st.session_state.chat_history.append(
-                    {"role": "user", "text": "chat_response"})
+                    {"role": "user", "text": "Sale Assistant"})
                 st.session_state.chat_history.append(
-                    {"role": "assistant", "text": "chat_response"})
+                    {"role": "assistant", "text": "Ask me anything about the products you are interested in."})
                 st.experimental_rerun()
 
         with col2:
@@ -53,9 +53,9 @@ if not st.session_state.hide_btn:
                 st.session_state.hide_btn = True
                 st.session_state.flag = 2
                 st.session_state.chat_history.append(
-                    {"role": "user", "text": "chat_response"})
+                    {"role": "user", "text": "Tech Support"})
                 st.session_state.chat_history.append(
-                    {"role": "assistant", "text": "chat_response"})
+                    {"role": "assistant", "text": "What oven model you are facing issues with."})
                 st.experimental_rerun()
 
 # Re-render the chat history (Streamlit re-runs this script, so need this to preserve previous chat messages)
@@ -71,14 +71,9 @@ input_text = None
 if st.session_state.show_input and st.session_state.hide_btn:
     input_text = st.chat_input("Ask Ace...")
 
-# see if the vector index hasn't been created yet
-if st.session_state.flag == 2 and 'vector_index' not in st.session_state:
-    # show a spinner while the code in this with block runs
-    with st.spinner("Indexing document..."):
-        # retrieve the index through the supporting library and store in the app's session cache
-        st.session_state.vector_index = glib.get_index()
-
 if input_text:  # run the code in this if block after the user submits a chat message
+
+    chat_response = None  # initialize the chat response
 
     with st.chat_message("user"):  # display a user chat message
         st.markdown(input_text)  # renders the user's latest message
@@ -98,8 +93,23 @@ if input_text:  # run the code in this if block after the user submits a chat me
             prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback)
 
     elif st.session_state.flag == 2:
-        chat_response = glib.get_chat_response_rag(
-            prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback, index=st.session_state.vector_index)
+        # see if the vector index hasn't been created yet
+        if 'vector_index' not in st.session_state:
+            # show a spinner while the code in this with block runs
+            with st.spinner("Indexing document..."):
+                # retrieve the index through the supporting library and store in the app's session cache
+
+                try:
+                    st.session_state.vector_index = glib.get_index(
+                        "pdf/" + input_text + ".pdf")
+                    chat_response = st.success(
+                        "Document indexed successfully! Please answer any questions you have.")
+                except:
+                    st.error("Document not found. Please try again.")
+
+        else:
+            chat_response = glib.get_chat_response_rag(
+                prompt=input_text, memory=st.session_state.memory, streaming_callback=st_callback, index=st.session_state.vector_index)
 
     # append the bot's latest message to the chat history
     st.session_state.chat_history.append(
