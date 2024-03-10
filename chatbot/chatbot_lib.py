@@ -20,7 +20,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
-
+import _sqlite3
 
 
 def get_llm(streaming_callback):
@@ -47,7 +47,7 @@ def get_llm(streaming_callback):
     return llm
 
 
-def get_index(pdf_path):  # creates and returns an in-memory vector store to be used in the application
+def get_index():  # creates and returns an in-memory vector store to be used in the application
 
     embeddings = BedrockEmbeddings(
         # sets the profile name to use for AWS credentials (if not the default)
@@ -58,7 +58,7 @@ def get_index(pdf_path):  # creates and returns an in-memory vector store to be 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    # pdf_path = "2022-Shareholder-Letter.pdf"
+    pdf_path = "2022-Shareholder-Letter.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
@@ -96,8 +96,6 @@ def get_memory(st_callback, flag):  # create memory for this chat session
 # rag response
 def get_chat_response_rag(prompt, memory, streaming_callback, index):
 
-    llm = get_llm(streaming_callback)
-
     conversation_with_retrieval = ConversationalRetrievalChain.from_llm(
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)
 
@@ -114,14 +112,42 @@ def get_chat_response(prompt, memory, streaming_callback):  # chat client functi
     chain = create_sql_query_chain(llm, db)
 
     response = chain.invoke({"question": prompt})
-    
+    response = response.replace("SQLResult:", "")
 
-    execute_query = QuerySQLDataBaseTool(db=db)
-    write_query = create_sql_query_chain(llm, db)
-    chain = write_query | execute_query
-    chain.invoke({"question": "How many employees are there"})
+    con = _sqlite3.connect("Chinook.db")
+
+    cur = con.cursor()
+
+    res = cur.execute(response)
+
+    print(res.fetchone())
+
+
+
+    # answer_prompt = PromptTemplate.from_template(
+    #     """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
+
+    #     Question: {question}
+    #     SQL Query: {query}
+    #     SQL Result: {result}
+    #     Answer: """
+    #     )
+
+    # write_query = create_sql_query_chain(llm, db)
+    # execute_query = QuerySQLDataBaseTool(db=db)
+    # print(write_query)
+    # print(execute_query)
+    # answer = answer_prompt | llm | StrOutputParser()
+    # chain = (
+    #     RunnablePassthrough.assign(query=write_query).assign(
+    #         result=itemgetter(response) | execute_query
+    #     )
+    #     | answer
+    # )
+    # chain.invoke({"question": prompt})
+
+    print(response)
     
-    print(chain.invoke({"question": "How many employees are there"}))
 
     # return response['answer']
 
