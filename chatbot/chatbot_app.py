@@ -19,6 +19,12 @@ if 'chat_history' not in st.session_state:  # see if the chat history hasn't bee
     st.session_state.chat_history = []  # initialize the chat history
 
 
+if 'vector_index' not in st.session_state:  # see if the vector index hasn't been created yet
+    # show a spinner while the code in this with block runs
+    with st.spinner("Indexing document..."):
+        # retrieve the index through the supporting library and store in the app's session cache
+        st.session_state.vector_index = glib.get_index()
+
 if 'show_input' not in st.session_state:
     st.session_state.show_input = False  # hidden by default
 if 'hide_btn' not in st.session_state:
@@ -68,6 +74,12 @@ if not st.session_state.hide_btn:
                 st.session_state.show_input = True  # Enable input field
                 st.session_state.hide_btn = True
                 # force refresh
+                # Sostituisci questa linea nel tuo codice
+                st.session_state.memory = glib.get_memory()
+
+                # Con questa linea che utilizza la funzione appena creata
+                st.session_state.memory = glib.get_memory_from_database()
+
                 st.experimental_rerun()
 
 

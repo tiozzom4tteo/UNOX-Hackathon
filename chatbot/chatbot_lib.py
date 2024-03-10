@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import json
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.llms.bedrock import Bedrock
@@ -93,16 +94,31 @@ def get_chat_response(prompt, memory, index, streaming_callback):  # chat client
     # pass the user message, history, and knowledge to the model
     chat_response = conversation_with_retrieval({"question": prompt})
     print(prompt)
-    prova = "Utente: " + prompt + \
-        ". Crea una query in linguaggio sql per trovare il forno ricercato dall'utente."
+    prova = "Utente: " + prompt + ". Crea una query in linguaggio sql per trovare il brand di nome 'Blodgett'"
     prova1 = conversation_with_retrieval({"question": prova})
-    db = SQLDatabase.from_uri(
-        f"postgresql+psycopg2://{postgres_user}:{postgres_password}@{postgres_host}/{postgres_db}")
+    db = SQLDatabase.from_uri("sqlite:///ovens.db")
 
-    chain = create_sql_query_chain(llm, db)
-    response = chain.invoke({"question": "qual è il cognome di matteo"})
 
-    print(db.run(response))
+    print(db.dialect)
     print(prova1)
 
     return chat_response['answer']
+
+
+# Aggiungi questa importazione alla parte superiore del tuo codice
+
+
+def get_memory_from_database():
+    # Modifica queste informazioni in base al tuo database
+    database_path = 'ovens.db'
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+
+    # Esempio di query per ottenere i dati dalla tabella 'memory'
+    cursor.execute("SELECT * FROM ovens")
+    memory_data = cursor.fetchall()
+    print(memory_data)
+    # Chiudi la connessione al database
+    connection.close()
+
+    return memory_data
