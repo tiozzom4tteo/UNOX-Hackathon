@@ -100,29 +100,89 @@ def get_chat_response_rag(prompt, memory, streaming_callback, index):
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)
 
     # pass the user message, history, and knowledge to the model
-    chat_response = conversation_with_retrieval({"question": prompt})
+    chat_response = conversation_with_retrieval({"question": {prompt}
+})
 
     return chat_response['answer']
 
 
-def get_chat_response(prompt, memory, streaming_callback):  # chat client function
+def get_chat_response(prompt, memory, streaming_callback):  
 
     db = SQLDatabase.from_uri("sqlite:///ovensUnox.db")
     llm = get_llm(streaming_callback)
     chain = create_sql_query_chain(llm, db)
+    
+    # It generates a SQL query from the context and executes it on the database.
+    response = chain.invoke({"question": """
+        You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.
+        Unless the user specifies in the question a specific number of examples to obtain, query for at most 5 results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.
+        Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in double quotes (") to denote them as delimited identifiers.
+        Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+        Pay attention to use date('now') function to get the current date if the question involves "today".
+        
+        Use the following format:
+        
+        Question: Question here
+        SQLQuery: SQL Query to run
+        SQLResult: Result of the SQLQuery
+        Answer: Final answer here
+        
+        Database schema:
+            table: oven
+                list of attributes:
+                    - unique_id: primary key
+                    - brand: string with the oven's brand
+                    - technology_type:
+                    
+        
+        Examples:
+        
+        Question1: "Identificare il forno che consuma di più in base al tasso di ingresso"
+        SQLQuery1: "SELECT brand, model_name, input_rate  FROM oven  ORDER BY input_rate DESC 
+        LIMIT 1;"
+        
+        Question2: "Identificare il forno che consuma di meno in base al tasso di energia in 
+        modalità di cottura a vapore inattivo"
+        SQLQuery2: "SELECT brand, model_name, steam_idle_energy_rate  FROM oven 
+        WHERE steam_idle_energy_rate IS NOT NULL  ORDER BY steam_idle_energy_rate  LIMIT 1;"
+        
+        Question3: "Identificare i forni che utilizzano un particolare tipo di combustibile"
+        SQLQuery3:  "SELECT brand, model_name  FROM oven WHERE fuel_type = 'Gas';"
+        
+        Don't write the last row "SQLResult:"
+                             
+        Don't write the 'SQLQuery:'
+        
+        Question:""" + prompt})
 
-    response = chain.invoke({"question": prompt})
-    response = response.replace("SQLResult:", "")
 
-    con = _sqlite3.connect("Chinook.db")
+    response = response[:response.find(";") + 1]
+
+
+    con = _sqlite3.connect("ovensUnox.db")
+    
+    # query = "SELECT * FROM oven where 'Brand Name' == 'Unox'"
 
     cur = con.cursor()
 
     res = cur.execute(response)
 
-    print(res.fetchone())
+    conversation_with_summary = ConversationChain(  
+        llm=llm,  
+        memory=memory,  
+        verbose=True  
+    )
+
+    stringa = prompt + "\n" + response + "\n" + """Context: 'You are a salesman and you are trying to send an oven to the customer who made the query. Use the SQL query to give the best answer to convince him'.  .
+    you have to use {response}, {res} and {prompt} to answer the question with natural language, not other datas"""
+
+    chat_response = conversation_with_summary.predict(input=stringa)
+
+    print(response)
 
 
+
+    # It should transform the response into a human-readable format and return it.
 
     # answer_prompt = PromptTemplate.from_template(
     #     """Given the following user question, corresponding SQL query, and SQL result, answer the user question.
@@ -146,11 +206,6 @@ def get_chat_response(prompt, memory, streaming_callback):  # chat client functi
     # )
     # chain.invoke({"question": prompt})
 
-    print(response)
-    
-
-    # return response['answer']
-
     # conversation_with_summary = ConversationChain(  # create a chat client
     #     llm=llm,  # using the Bedrock LLM
     #     memory=memory,  # with the summarization memory
@@ -160,4 +215,4 @@ def get_chat_response(prompt, memory, streaming_callback):  # chat client functi
     # # pass the user message and summary to the model
     # chat_response = conversation_with_summary.predict(input=prompt)
 
-    # return chat_response
+    return chat_response
