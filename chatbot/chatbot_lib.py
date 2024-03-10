@@ -11,9 +11,16 @@ from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 
-import sqlite3
 from langchain.chains import create_sql_query_chain
 from langchain_community.utilities import SQLDatabase
+
+from operator import itemgetter
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+
 
 
 def get_llm(streaming_callback):
@@ -40,7 +47,7 @@ def get_llm(streaming_callback):
     return llm
 
 
-def get_index():  # creates and returns an in-memory vector store to be used in the application
+def get_index(pdf_path):  # creates and returns an in-memory vector store to be used in the application
 
     embeddings = BedrockEmbeddings(
         # sets the profile name to use for AWS credentials (if not the default)
@@ -51,7 +58,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "2022-Shareholder-Letter.pdf"
+    # pdf_path = "2022-Shareholder-Letter.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
@@ -89,6 +96,8 @@ def get_memory(st_callback, flag):  # create memory for this chat session
 # rag response
 def get_chat_response_rag(prompt, memory, streaming_callback, index):
 
+    llm = get_llm(streaming_callback)
+
     conversation_with_retrieval = ConversationalRetrievalChain.from_llm(
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)
 
@@ -103,9 +112,16 @@ def get_chat_response(prompt, memory, streaming_callback):  # chat client functi
     db = SQLDatabase.from_uri("sqlite:///ovensUnox.db")
     llm = get_llm(streaming_callback)
     chain = create_sql_query_chain(llm, db)
+
     response = chain.invoke({"question": prompt})
-    print("1")
-    print(response)
+    
+
+    execute_query = QuerySQLDataBaseTool(db=db)
+    write_query = create_sql_query_chain(llm, db)
+    chain = write_query | execute_query
+    chain.invoke({"question": "How many employees are there"})
+    
+    print(chain.invoke({"question": "How many employees are there"}))
 
     # return response['answer']
 
