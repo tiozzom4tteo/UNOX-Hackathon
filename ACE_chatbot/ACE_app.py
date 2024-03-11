@@ -1,5 +1,5 @@
 import streamlit as st  # all streamlit commands will be available through the "st" alias
-import chatbot_lib as glib  # reference to local lib script
+import ACE_lib as glib  # reference to local lib script
 from langchain.callbacks import StreamlitCallbackHandler
 
 
