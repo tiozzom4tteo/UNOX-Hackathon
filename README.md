@@ -1,37 +1,33 @@
 # UNOX-Hackathon
 
-## What is it?
-
-It is a project developed by Tiozzo Matteo, Nicolò Pellegrinelli, Donanzan Davide, Orlando Ferazzani, Filippo Rizzolo, Tommaso Terrin and Matteo Tonello as part of Unox S.p.A.'s 24H challenge. It uses GenAI to generate SQL queries from natural language queries. Once generated, the query is executed in a local database and the resulting response is transformed by the AI into natural language.
+Group name: *Gang of ++Four+=2*
 
 ## The Challenge
 
-Use GenAI to develop or improve functionalities and user experience at least one of the following platforms:
+Use GenAI to develop or improve functionalities and user experience in at least one of the following platforms:
 
 - [UNOX Website](https://www.unox.com/it_it/)
 - [UNOX DDC - Data Driven Cooking](https://demo.datadrivencooking.com/)
 - [UNOX Digital.ID ovens](https://www.unox.com/it_it/app-e-sistema-operativo/app/digitalid/)
 
+## What
+
+It's a project developed by Davide Donanzan, Orlando Ferazzani, Nicolò Pellegrinelli, Filippo Rizzolo, Tommaso Terrin, Matteo Tiozzo and Matteo Tonello as part of UNOX S.p.A.'s 24h Hackathon challenge. A(ssistant) C(hatbot) E(xperience) has two main functionalities: it helps customers chosing the oven that suits them best from the context and gives assistance on their model of oven. The chatbot uses GenAI to generate SQL queries from natural language queries. Once generated, the query is executed on a database and the results are reconverted to natural language.
+
 ## Requirements
 
 To use this project you need to:
 
-- Have AWS credential
-- Amazon Bedrock
-- Python3 installed
-- Pip3 installed
+- AWS credential and Amazon Bedrock
+- Python3
+- Pip3
 
 ## Configuration
 
 To run this project you need to:
 
-- Download the zip
-- Extract the zip and enter the folder
-- Remove jq from setup/requirements.txt
-- Open window terminal and run this command: `pip3 install -r setup/requirements.txt`
-- Open completed/api/bedrock_api.py and make the following changes:
-  - profile_name="default"
-  - region_name="us-east-1"
-  - endpoint_url → remove row
-- Run `aws configure` and insert AWS keys
-- Try to run `completed/api/bedrock_api.py`
+- Run: `pip3 install -r setup/requirements.txt`
+- Run `aws configure` and enter AWS keys
+- Go to [ACE_chatbot](ACE_chatbot) folder
+- Run `streamlit run ACE_app.py --server.port 8080`
+- If necessary change `credentials_profile_name` and `region_name` in [ACE_lib.py](ACE_chatbot/ACE_lib.py)
