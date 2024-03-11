@@ -27,11 +27,11 @@ To run this project you need to:
 - Extract the zip and enter the folder
 - Remove jq from setup/requirements.txt
 - Open window terminal and run this command:
-  'pip3 install -r setup/requirements.txt'
+  '''pip3 install -r setup/requirements.txt'''
 - Open completed/api/bedrock_api.py and make the following changes:
   - profile_name="default"
   - region_name="us-east-1"
   - endpoint_url → remove row
 - Run 'aws configure' and insert AWS keys
-- Try to run 
-    'python completed/api/bedrock_api.py'
+- Try to run
+  'python completed/api/bedrock_api.py'
