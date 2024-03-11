@@ -104,8 +104,9 @@ if input_text:  # run the code in this if block after the user submits a chat me
                         "pdf/" + input_text + ".pdf")
                     chat_response = st.success(
                         "Document indexed successfully! Please answer any questions you have.")
-                except:
+                except FileNotFoundError:
                     st.error("Document not found. Please try again.")
+                    print(FileExistsError)
 
         else:
             chat_response = glib.get_chat_response_rag(

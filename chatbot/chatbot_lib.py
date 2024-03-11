@@ -47,7 +47,7 @@ def get_llm(streaming_callback):
     return llm
 
 
-def get_index():  # creates and returns an in-memory vector store to be used in the application
+def get_index(pdf_path):  # creates and returns an in-memory vector store to be used in the application
 
     embeddings = BedrockEmbeddings(
         # sets the profile name to use for AWS credentials (if not the default)
@@ -58,7 +58,7 @@ def get_index():  # creates and returns an in-memory vector store to be used in 
     )  # create a Titan Embeddings client
 
     # assumes local PDF file with this name
-    pdf_path = "2022-Shareholder-Letter.pdf"
+    # pdf_path = "2022-Shareholder-Letter.pdf"
 
     loader = PyPDFLoader(file_path=pdf_path)  # load the pdf file
 
@@ -96,22 +96,24 @@ def get_memory(st_callback, flag):  # create memory for this chat session
 # rag response
 def get_chat_response_rag(prompt, memory, streaming_callback, index):
 
+    llm = get_llm(streaming_callback)
+
     conversation_with_retrieval = ConversationalRetrievalChain.from_llm(
         llm, index.vectorstore.as_retriever(), memory=memory, verbose=True)
 
     # pass the user message, history, and knowledge to the model
     chat_response = conversation_with_retrieval({"question": {prompt}
-})
+                                                 })
 
     return chat_response['answer']
 
 
-def get_chat_response(prompt, memory, streaming_callback):  
+def get_chat_response(prompt, memory, streaming_callback):
 
     db = SQLDatabase.from_uri("sqlite:///dataNew.db")
     llm = get_llm(streaming_callback)
     chain = create_sql_query_chain(llm, db)
-    
+
     # It generates a SQL query from the context and executes it on the database.
     response = chain.invoke({"question": """
         You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.
@@ -155,23 +157,22 @@ def get_chat_response(prompt, memory, streaming_callback):
         
         Question:""" + prompt})
 
-
     response = response[:response.find(";") + 1]
 
     print(response)
 
     con = _sqlite3.connect("ovensUnox.db")
-    
+
     # query = "SELECT * FROM oven where 'Brand Name' == 'Unox'"
 
     cur = con.cursor()
 
     res = cur.execute(response)
 
-    conversation_with_summary = ConversationChain(  
-        llm=llm,  
-        memory=memory,  
-        verbose=True  
+    conversation_with_summary = ConversationChain(
+        llm=llm,
+        memory=memory,
+        verbose=True
     )
 
     stringa = prompt + "\n" + response + "\n" + """Context: 'You are a salesman and you are trying to send an oven to the customer who made the query. Use the SQL query to give the best answer to convince him'.  .
@@ -179,9 +180,7 @@ def get_chat_response(prompt, memory, streaming_callback):
 
     chat_response = conversation_with_summary.predict(input=stringa)
 
-    print(response)
-
-
+    print(chat_response)
 
     # It should transform the response into a human-readable format and return it.
 
