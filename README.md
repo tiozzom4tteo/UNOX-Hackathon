@@ -1,6 +1,8 @@
 # UNOX-Hackathon
 
-Gang of ++Four+=2
+## What is it?
+
+It is a project developed by Tiozzo Matteo, Nicolò Pellegrinelli, Donanzan Davide, Orlando Ferazzani, Filippo Rizzolo, Tommaso Terrin and Matteo Tonello as part of Unox S.p.A.'s 24H challenge. It uses GenAI to generate SQL queries from natural language queries. Once generated, the query is executed in a local database and the resulting response is transformed by the AI into natural language.
 
 ## The Challenge
 
