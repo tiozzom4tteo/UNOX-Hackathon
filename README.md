@@ -16,7 +16,7 @@ It's a project developed by Davide Donanzan, Orlando Ferazzani, Nicolò Pellegri
 
 ## Requirements
 
-To use this project you need to:
+To use this project you need:
 
 - AWS credential and Amazon Bedrock
 - Python3
