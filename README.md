@@ -1,4 +1,4 @@
-# Team1-UNOX-Hackathon
+# UNOX-Hackathon
 
 Gang of ++Four+=2
 
