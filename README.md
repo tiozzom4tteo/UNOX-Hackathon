@@ -1,7 +1,5 @@
 # UNOX-Hackathon
 
-Group name: *Gang of ++Four+=2*
-
 ## The Challenge
 
 Use GenAI to develop or improve functionalities and user experience in at least one of the following platforms:
@@ -26,6 +24,7 @@ To use this project you need:
 
 To run this project you need to:
 
+- Remove jq from setup/requirements.txt
 - Run: `pip3 install -r setup/requirements.txt`
 - Run `aws configure` and enter AWS keys
 - Go to [ACE_chatbot](ACE_chatbot) folder
